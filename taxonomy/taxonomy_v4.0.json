@@ -1,0 +1,192 @@
+{
+  "version": "v4.0",
+  "_note": "Edit freely. The Diagnostician prompt is rendered from this file and the Strategist reads `recovery` from it. Design rule: one type = one recovery. The Monitor reports the symptom (what happened); this file classifies the cause (why). This is v4.0, the file used by the ADR v1 runs.",
+  "types": [
+    {
+      "id": "I",
+      "name": "Grounding & Execution Error",
+      "definition": "The action was carried out in the wrong place or the wrong way relative to what the agent itself intended: the click landed off the element its reasoning names (beside it, on empty space, or on a neighbouring element), or the interaction kind was wrong (click instead of double-click, drag that did not take).",
+      "subtypes": [
+        "mislocated_click",
+        "interaction_mechanics"
+      ],
+      "recovery": "reground",
+      "v3": [
+        "I"
+      ],
+      "cuadebug": [
+        "G1",
+        "G3",
+        "R5",
+        "R6"
+      ]
+    },
+    {
+      "id": "II",
+      "name": "Unresponsive Environment (State Stagnation)",
+      "definition": "A valid, well-aimed action on a visible, enabled, unobstructed target produced no response: dead click, input ignored, page still loading, frozen UI, network error. The action was right; the world did not react.",
+      "subtypes": [
+        "dead_click",
+        "loading_delay",
+        "network_or_system_error"
+      ],
+      "recovery": "wait_retry",
+      "v3": [
+        "II"
+      ],
+      "cuadebug": [
+        "S1",
+        "S2",
+        "S3",
+        "S5",
+        "S6"
+      ]
+    },
+    {
+      "id": "III",
+      "name": "Obstruction",
+      "definition": "The target exists but something covers or gates it, so the action hit the obstruction instead. A dismissable overlay (pop-up, cookie banner, ad, newsletter, notification) can be closed by the agent. An access gate (sign-in wall, CAPTCHA, permission prompt) needs a person.",
+      "subtypes": [
+        "dismissable_overlay",
+        "access_gate"
+      ],
+      "recovery": "dismiss_retry",
+      "subtype_recovery": {
+        "access_gate": "escalate"
+      },
+      "v3": [
+        "III"
+      ],
+      "cuadebug": [
+        "G2",
+        "G4"
+      ]
+    },
+    {
+      "id": "IV",
+      "name": "Wrong Target or Value",
+      "definition": "The action hit exactly the element the agent intended and it worked, but that element or the value entered is wrong for the task: wrong option, wrong item, wrong field, a typo or wrong number, or a step that breaks a stated constraint.",
+      "subtypes": [
+        "wrong_element",
+        "wrong_value",
+        "constraint_violation"
+      ],
+      "recovery": "fix_target_value",
+      "v3": [
+        "IV (wrong target / value, constraint violation)"
+      ],
+      "cuadebug": [
+        "R1",
+        "R7"
+      ]
+    },
+    {
+      "id": "V",
+      "name": "Plan & Task-Understanding Error",
+      "definition": "Every step executes as intended, but the approach cannot complete the task: misunderstood goal, wrong page or strategy, missing or infeasible step, missing knowledge of how the app works, repeating an ineffective idea, or losing track of the goal (context loss, goal drift).",
+      "subtypes": [
+        "goal_misinterpretation",
+        "bad_plan",
+        "knowledge_gap",
+        "ineffective_repetition",
+        "context_loss"
+      ],
+      "recovery": "replan",
+      "v3": [
+        "V",
+        "IV (goal misinterpretation)",
+        "out-of-scope memory failure"
+      ],
+      "cuadebug": [
+        "R2",
+        "R3",
+        "R4",
+        "R8",
+        "R9",
+        "R12",
+        "R13",
+        "O1"
+      ]
+    },
+    {
+      "id": "VI",
+      "name": "Perception Error",
+      "definition": "The agent's own description of the screen is wrong, and its action follows from that wrong belief: it sees something that is not there, misreads text or a value, misses something visible, or believes a step or the whole task is done when the screen shows it is not.",
+      "subtypes": [
+        "hallucinated_state",
+        "misread_value",
+        "missed_element",
+        "progress_misjudgment"
+      ],
+      "recovery": "correct_belief",
+      "v3": [
+        "VI",
+        "I (visual hallucination part)"
+      ],
+      "cuadebug": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "R10",
+        "R11"
+      ]
+    },
+    {
+      "id": "N",
+      "name": "No Failure",
+      "definition": "On inspection the action did what was intended and the run is on track: the alarm was false (or the failure belongs to the benchmark, not the agent). No recovery.",
+      "subtypes": [
+        "false_alarm"
+      ],
+      "recovery": "none",
+      "v3": [],
+      "cuadebug": []
+    }
+  ],
+  "procedure": [
+    "Q0. Did anything actually go wrong? If the action did what the agent intended and the run is still on track, answer N.",
+    "Q1. Is a pop-up, banner, dialog, overlay, sign-in wall or CAPTCHA covering the page or the target, so the action hit it instead? -> III (dismissable_overlay if it has a close / accept / no-thanks control, else access_gate).",
+    "Q2. Was the action aimed correctly at a visible, enabled, unobstructed target, yet the screen did not respond (nothing changed, still loading, frozen)? -> II.",
+    "Q3. Did the action land somewhere other than the element the agent's own reasoning says it was aiming at (the red marker is not on that element), or use the wrong kind of interaction? -> I.",
+    "Q4. Did the action hit exactly the element the agent meant, but that element or the value entered is wrong for the task (wrong option, field or item, typo, wrong number, broken constraint)? -> IV.",
+    "Q5. Does the agent's description of the screen contradict what the screenshot shows (sees something absent, misreads a value, misses something visible, or thinks the task is complete when it is not), with its action following from that belief? -> VI.",
+    "Q6. Otherwise everything executed as intended but the approach cannot reach the goal -> V."
+  ],
+  "tie_breakers": [
+    "Looping with the target not responding -> II. Looping because the agent keeps trying the same ineffective idea although the screen responds -> V.",
+    "Premature 'done': VI if the screen clearly shows the task incomplete and the agent claims otherwise; V if the agent misunderstood what the task asks.",
+    "A typed value that differs from what the task requires is IV even if the field is correct. A click that lands on a neighbouring element the agent did not name is I."
+  ],
+  "axes": {
+    "awareness": {
+      "values": [
+        "aware",
+        "unaware"
+      ],
+      "rule": "aware if the agent's latest reasoning acknowledges the problem; unaware otherwise (silent failure). unaware + declared done = premature termination, which the Monitor vetoes."
+    },
+    "behaviour": {
+      "values": [
+        "progressing",
+        "looping",
+        "thrashing"
+      ],
+      "rule": "looping = same action or same screen repeated without progress; thrashing = many different actions without converging."
+    },
+    "recoverability": {
+      "values": [
+        "recoverable",
+        "irreversible"
+      ],
+      "rule": "irreversible if the action submitted, sent, purchased, deleted or published something. Never retry an irreversible step."
+    }
+  },
+  "labelling_only_axes": [
+    "self_verification",
+    "feasibility",
+    "termination"
+  ],
+  "_cuadebug_excluded": "S4 (step/resource limit), S7 (benchmark/evaluation artifact: the agent did not fail) and IF1/IF2 (infeasible-by-design tasks) are not agent failure causes and are excluded from type scoring."
+}

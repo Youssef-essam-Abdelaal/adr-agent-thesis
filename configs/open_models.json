@@ -1,0 +1,16 @@
+{
+  "_comment": "Open models: UI-TARS-1.5-7B (vLLM, served as 'ui-tars') is the base agent; Qwen3-VL-32B-Instruct 4-bit (Ollama) is judge, Diagnostician and element finder. Run with ADR_NO_OPENAI=1 so nothing can reach OpenAI. ADR settings are the defaults (same as the GPT runs); only the models differ.",
+  "agent_kind": "uitars",
+  "agent_model": "ui-tars",
+  "agent_base_url": "http://127.0.0.1:18000/v1",
+  "judge_model": "qwen3-vl:32b-instruct-q4_K_M",
+  "judge_base_url": "ollama:http://127.0.0.1:11435",
+  "diag_model": "qwen3-vl:32b-instruct-q4_K_M",
+  "diag_base_url": "ollama:http://127.0.0.1:11435",
+  "ground_model": "qwen3-vl:32b-instruct-q4_K_M",
+  "ground_base_url": "ollama:http://127.0.0.1:11435",
+  "local_ctx": 8192,
+  "local_temperature": 0.0,
+  "workers": 2,
+  "ground_coords": "norm1000"
+}

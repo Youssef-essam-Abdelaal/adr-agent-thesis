@@ -1,0 +1,14 @@
+{
+  "_comment": "Judge benchmarks (adr/judge_bench.py) with an open judge: Qwen3-VL-32B-Instruct 4-bit served by Ollama. Screenshots shrunk to 1280 px on the long side. ADR settings are the defaults. Run with ADR_NO_OPENAI=1.",
+  "judge_model": "qwen3-vl:32b-instruct-q4_K_M",
+  "judge_base_url": "ollama:http://127.0.0.1:11435",
+  "diag_model": "qwen3-vl:32b-instruct-q4_K_M",
+  "diag_base_url": "ollama:http://127.0.0.1:11435",
+  "ground_model": "qwen3-vl:32b-instruct-q4_K_M",
+  "ground_base_url": "ollama:http://127.0.0.1:11435",
+  "local_ctx": 8192,
+  "local_temperature": 0.0,
+  "local_max_side": 1280,
+  "scale": 2,
+  "ground_coords": "norm1000"
+}
